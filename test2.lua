@@ -5360,27 +5360,17 @@ local function teleportKunaiToPlayerHead(kunai, playerName)
 end
 
 local function checkForKunais()
-    if selectedPlayerName then
-        for _, kunai in ipairs(workspace:GetChildren()) do
-            if (kunai.Name == "ThrownKunai" or kunai.Name == "ShurikenKunai") and not teleportedKunais[kunai] then
-                teleportKunaiToPlayerHead(kunai, selectedPlayerName)
-            end
+    for _, kunai in ipairs(workspace:GetChildren()) do
+        if (kunai.Name == "ThrownKunai" or kunai.Name == "ShurikenKunai") and not teleportedKunais[kunai] then
+            teleportKunaiToPlayerHead(kunai, selectedPlayerName)
         end
     end
 end
 
--- Loop to continuously check for new kunais
-spawn(function()
-    while true do
-        checkForKunais()
-        wait(0.1)  -- Faster checking interval
-    end
-end)
-
--- Set `selectedPlayerName` when a player is clicked in the TPShur tab
+-- Trigger this function when a player is selected in the TPShur tab
 local function onPlayerSelected(playerName)
     selectedPlayerName = playerName
-    -- Immediately start teleporting kunais for the selected player
+    -- Immediately teleport kunais to the selected player
     checkForKunais()
 end
 
@@ -6424,13 +6414,11 @@ local function checkForThrownKunais()
     end
 end
 
--- Main loop for frequent kunai checking
-spawn(function()
-    while true do
-        checkForThrownKunais()
-        wait(0.1)  -- Adjusted to a shorter wait time for faster checks
-    end
-end)
+-- Trigger this function to teleport kunais when necessary
+local function onPlayerSelected(playerName)
+    selectedPlayerName = playerName
+    checkForThrownKunais()
+end
 
 
 
@@ -7258,28 +7246,20 @@ local function teleportKunaiToPlayerHead(kunai, playerName)
 end
 
 local function checkForKunais()
-    if selectedPlayerName then
-        for _, kunai in ipairs(workspace:GetChildren()) do
-            if (kunai.Name == "ThrownKunai" or kunai.Name == "ShurikenKunai") and not teleportedKunais[kunai] then
-                teleportKunaiToPlayerHead(kunai, selectedPlayerName)
-            end
+    for _, kunai in ipairs(workspace:GetChildren()) do
+        if (kunai.Name == "ThrownKunai" or kunai.Name == "ShurikenKunai") and not teleportedKunais[kunai] then
+            teleportKunaiToPlayerHead(kunai, selectedPlayerName)
         end
     end
 end
 
--- Start a loop to continuously check for new kunais
-spawn(function()
-    while true do
-        checkForKunais()
-        wait(0.1)  -- Faster checking interval
-    end
-end)
-
--- Function for selecting a player in TPShur tab and immediately teleporting kunais
+-- Trigger this function when a player is selected in the TPShur tab
 local function onPlayerSelected(playerName)
     selectedPlayerName = playerName
+    -- Instantly teleport kunais to the selected player
     checkForKunais()
 end
+
 
 
 
