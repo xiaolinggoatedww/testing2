@@ -5353,12 +5353,9 @@ local function teleportKunaiToPlayerHead(kunai, playerName)
         local head = character:FindFirstChild("Head")
 
         if head then
-            -- Introduce a 0.2-second delay to help with synchronization and prevent glitches
-            wait(0.1)  -- Slight delay to ensure proper synchronization
-
-            -- Teleport the kunai to the player's head
+            -- Instantly set the kunai's position to the player's head (no tweening)
             kunai.CFrame = head.CFrame
-            teleportedKunais[kunai] = true  -- Mark as teleported to prevent repeated teleportation
+            teleportedKunais[kunai] = true  -- Mark the kunai as teleported to avoid teleporting it again
         end
     end
 end
@@ -5377,9 +5374,10 @@ end
 spawn(function()
     while true do
         checkForKunais()
-        wait(0.1)  -- Short wait between checks to keep the loop fast
+        wait(0.1)  -- Check more frequently (adjustable as needed)
     end
 end)
+
 
 
 
@@ -6410,12 +6408,9 @@ local function teleportKunaiToPlayerHead(kunai, player)
         local character = player.Character
         local head = character:FindFirstChild("Head")
         if head then
-            -- Introduce a 0.2-second delay to help with synchronization and prevent glitches
-            wait(0.1)  -- Slight delay to ensure proper synchronization
-
-            -- Teleport the kunai to the player's head
+            -- Instantly set the kunai's position to the player's head (no tweening)
             kunai.CFrame = head.CFrame
-            teleportedKunais[kunai] = true  -- Mark as teleported to prevent repeated teleportation
+            teleportedKunais[kunai] = true  -- Mark the kunai as teleported to avoid teleporting it again
         end
     end
 end
@@ -6453,6 +6448,26 @@ local function startLoop()
         wait(0.1) -- Adjust this delay if needed for more frequent checks
     end
 end
+
+local function toggle()
+    enabled = not enabled
+
+    if enabled then
+        TextButton_20.Text = "On"
+        TextButton_20.TextColor3 = Color3.fromRGB(0, 255, 0)
+        runConnection = coroutine.create(startLoop)
+        coroutine.resume(runConnection)
+    else
+        TextButton_20.Text = "Off"
+        TextButton_20.TextColor3 = Color3.fromRGB(255, 0, 0)
+        
+        if runConnection then
+            coroutine.yield(runConnection)
+            runConnection = nil
+        end
+    end
+end
+
 
 local function toggle()
     enabled = not enabled
@@ -7311,12 +7326,9 @@ local function teleportKunaiToPlayerHead(kunai, playerName)
         local head = character:FindFirstChild("Head")
 
         if head then
-            -- Introduce a 0.2-second delay to help with synchronization and prevent glitches
-            wait(0.1)  -- Slight delay to ensure proper synchronization
-
-            -- Teleport the kunai to the player's head
+            -- Instantly set the kunai's position to the player's head (no tweening)
             kunai.CFrame = head.CFrame
-            teleportedKunais[kunai] = true  -- Mark as teleported to prevent repeated teleportation
+            teleportedKunais[kunai] = true  -- Mark the kunai as teleported to avoid teleporting it again
         end
     end
 end
@@ -7335,9 +7347,10 @@ end
 spawn(function()
     while true do
         checkForKunais()
-        wait(0.1)  -- Short wait between checks to keep the loop fast
+        wait(0.1)  -- Check more frequently (adjustable as needed)
     end
 end)
+
 
 
 
