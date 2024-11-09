@@ -5341,73 +5341,47 @@ local runConnection
 
 
 
-local enabled = false
-local runConnection
 local teleportedKunais = {}
+local selectedPlayerName = nil
 
-local function teleportKunaiToPlayerHead(kunai, player)
+local function teleportKunaiToPlayerHead(kunai, playerName)
+    local player = game.Players:FindFirstChild(playerName)
+
     if player and player.Character and kunai and kunai:IsA("BasePart") then
         local character = player.Character
         local head = character:FindFirstChild("Head")
+
         if head then
-            -- Directly set the CFrame to teleport the kunai to the head's position instantly
+            -- Instantly set the kunai's position to the player's head
             kunai.CFrame = head.CFrame
             teleportedKunais[kunai] = true
         end
     end
 end
 
-local function teleportKunaisToPlayers(kunais)
-    local players = game.Players:GetPlayers()
-    local localPlayer = game.Players.LocalPlayer
-
-    for i, kunai in ipairs(kunais) do
-        local playerIndex = (i - 1) % #players + 1
-        local player = players[playerIndex]
-
-        if player ~= localPlayer then
-            teleportKunaiToPlayerHead(kunai, player)
+local function checkForKunais()
+    if selectedPlayerName then
+        for _, kunai in ipairs(workspace:GetChildren()) do
+            if (kunai.Name == "ThrownKunai" or kunai.Name == "ShurikenKunai") and not teleportedKunais[kunai] then
+                teleportKunaiToPlayerHead(kunai, selectedPlayerName)
+            end
         end
     end
 end
 
-local function checkForThrownKunais()
-    local thrownKunais = {}
-    for _, kunai in ipairs(workspace:GetChildren()) do
-        if kunai.Name == "ThrownKunai" and not teleportedKunais[kunai] then
-            table.insert(thrownKunais, kunai)
-        end
+-- Loop to continuously check for new kunais
+spawn(function()
+    while true do
+        checkForKunais()
+        wait(0.1)  -- Faster checking interval
     end
+end)
 
-    if #thrownKunais > 0 then
-        teleportKunaisToPlayers(thrownKunais)
-    end
-end
-
-local function startLoop()
-    while enabled do
-        checkForThrownKunais()
-        wait(0.1) -- Adjust this delay if needed for more frequent checks
-    end
-end
-
-local function toggle()
-    enabled = not enabled
-
-    if enabled then
-        TextButton_20.Text = "On"
-        TextButton_20.TextColor3 = Color3.fromRGB(0, 255, 0)
-        runConnection = coroutine.create(startLoop)
-        coroutine.resume(runConnection)
-    else
-        TextButton_20.Text = "Off"
-        TextButton_20.TextColor3 = Color3.fromRGB(255, 0, 0)
-        
-        if runConnection then
-            coroutine.yield(runConnection)
-            runConnection = nil
-        end
-    end
+-- Set `selectedPlayerName` when a player is clicked in the TPShur tab
+local function onPlayerSelected(playerName)
+    selectedPlayerName = playerName
+    -- Immediately start teleporting kunais for the selected player
+    checkForKunais()
 end
 
 
@@ -6410,9 +6384,7 @@ local selectedPlayerName = nil
 
 local teleportedKunais = {}
 
-local function teleportKunaiToPlayerHead(kunai, playerName)
-    local player = game.Players:FindFirstChild(playerName)
-
+local function teleportKunaiToPlayerHead(kunai, player)
     if player and player.Character and kunai and kunai:IsA("BasePart") then
         local character = player.Character
         local head = character:FindFirstChild("Head")
@@ -6425,23 +6397,41 @@ local function teleportKunaiToPlayerHead(kunai, playerName)
     end
 end
 
-local function checkForKunais()
-    if selectedPlayerName then
-        for _, kunai in ipairs(workspace:GetChildren()) do
-            if (kunai.Name == "ThrownKunai" or kunai.Name == "ShurikenKunai") and not teleportedKunais[kunai] then
-                teleportKunaiToPlayerHead(kunai, selectedPlayerName)
-            end
+local function teleportKunaisToPlayers(kunais)
+    local players = game.Players:GetPlayers()
+    local localPlayer = game.Players.LocalPlayer
+
+    for i, kunai in ipairs(kunais) do
+        local playerIndex = (i - 1) % #players + 1
+        local player = players[playerIndex]
+
+        if player ~= localPlayer then
+            teleportKunaiToPlayerHead(kunai, player)
         end
     end
 end
 
--- Start a loop to continuously check for thrown kunais
+local function checkForThrownKunais()
+    local thrownKunais = {}
+    for _, kunai in ipairs(workspace:GetChildren()) do
+        if kunai.Name == "ThrownKunai" and not teleportedKunais[kunai] then
+            table.insert(thrownKunais, kunai)
+        end
+    end
+
+    if #thrownKunais > 0 then
+        teleportKunaisToPlayers(thrownKunais)
+    end
+end
+
+-- Main loop for frequent kunai checking
 spawn(function()
     while true do
-        checkForKunais()
-        wait(0.1)  -- Adjusted to update more frequently
+        checkForThrownKunais()
+        wait(0.1)  -- Adjusted to a shorter wait time for faster checks
     end
 end)
+
 
 
 
@@ -7250,6 +7240,7 @@ local selectedPlayerName = nil
 
 
 local teleportedKunais = {}
+local selectedPlayerName = nil
 
 local function teleportKunaiToPlayerHead(kunai, playerName)
     local player = game.Players:FindFirstChild(playerName)
@@ -7259,7 +7250,7 @@ local function teleportKunaiToPlayerHead(kunai, playerName)
         local head = character:FindFirstChild("Head")
 
         if head then
-            -- Directly set the CFrame to teleport the kunai instantly to the head
+            -- Instantly set the kunai's position to the player's head
             kunai.CFrame = head.CFrame
             teleportedKunais[kunai] = true
         end
@@ -7276,13 +7267,20 @@ local function checkForKunais()
     end
 end
 
--- Start a loop to continuously check for thrown kunais
+-- Start a loop to continuously check for new kunais
 spawn(function()
     while true do
         checkForKunais()
-        wait(0.1)  -- Adjusted to a shorter wait time for more frequent checks
+        wait(0.1)  -- Faster checking interval
     end
 end)
+
+-- Function for selecting a player in TPShur tab and immediately teleporting kunais
+local function onPlayerSelected(playerName)
+    selectedPlayerName = playerName
+    checkForKunais()
+end
+
 
 
 
