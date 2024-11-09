@@ -5343,68 +5343,41 @@ local runConnection
 
 local enabled = false
 local runConnection
-local TweenService = game:GetService("TweenService")
 local teleportedKunais = {}
 
--- Function to teleport a kunai to the player's head using tweening
-local function teleportKunaiToPlayerHead(kunai, player)
+local function teleportKunaiToPlayerHead(kunai, playerName)
+    local player = game.Players:FindFirstChild(playerName)
+
     if player and player.Character and kunai and kunai:IsA("BasePart") then
         local character = player.Character
         local head = character:FindFirstChild("Head")
+
         if head then
-            -- Tween to the player's head with a short duration for smooth transition
-            local tweenInfo = TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-            local targetCFrame = head.CFrame
-
-            local tween = TweenService:Create(kunai, tweenInfo, {CFrame = targetCFrame})
-            tween:Play()
-
-            -- Mark the kunai as teleported to avoid teleporting it again
-            teleportedKunais[kunai] = true
+            -- Instantly set the kunai's position to the player's head (no tweening)
+            kunai.CFrame = head.CFrame
+            teleportedKunais[kunai] = true  -- Mark the kunai as teleported to avoid teleporting it again
         end
     end
 end
 
--- Function to teleport kunais to players
-local function teleportKunaisToPlayers(kunais)
-    local players = game.Players:GetPlayers()
-    local localPlayer = game.Players.LocalPlayer
-
-    for i, kunai in ipairs(kunais) do
-        local playerIndex = (i - 1) % #players + 1
-        local player = players[playerIndex]
-
-        -- Don't teleport to the local player
-        if player ~= localPlayer then
-            teleportKunaiToPlayerHead(kunai, player)
+local function checkForKunais()
+    if selectedPlayerName then
+        for _, kunai in ipairs(workspace:GetChildren()) do
+            if (kunai.Name == "ThrownKunai" or kunai.Name == "ShurikenKunai") and not teleportedKunais[kunai] then
+                teleportKunaiToPlayerHead(kunai, selectedPlayerName)
+            end
         end
     end
 end
 
--- Function to check for thrown kunais and teleport them
-local function checkForThrownKunais()
-    local thrownKunais = {}
-
-    -- Loop through all objects in the workspace to find thrown kunais
-    for _, kunai in ipairs(workspace:GetChildren()) do
-        if kunai.Name == "ThrownKunai" and not teleportedKunais[kunai] then
-            table.insert(thrownKunais, kunai)
-        end
+-- Start a loop to continuously check for thrown kunais
+spawn(function()
+    while true do
+        checkForKunais()
+        wait(0.1)  -- Check more frequently (adjustable as needed)
     end
+end)
 
-    -- If there are any thrown kunais, teleport them
-    if #thrownKunais > 0 then
-        teleportKunaisToPlayers(thrownKunais)
-    end
-end
-
--- Function to start the teleportation loop
-local function startLoop()
-    while enabled do
-        checkForThrownKunais()
-        wait(0.1) -- Adjust this delay if needed for more frequent checks
-    end
-end
 
 -- Toggle function to enable/disable teleportation
 local function toggle()
@@ -6425,49 +6398,73 @@ local selectedPlayerName = nil
 
 
 
-local TweenService = game:GetService("TweenService")
 local teleportedKunais = {}
 
--- Function to teleport a kunai to the player's head using tweening
-local function teleportKunaiToPlayerHead(kunai, playerName)
-    local player = game.Players:FindFirstChild(playerName)
-
+local function teleportKunaiToPlayerHead(kunai, player)
     if player and player.Character and kunai and kunai:IsA("BasePart") then
         local character = player.Character
         local head = character:FindFirstChild("Head")
-
         if head then
-            -- Use tweening for smooth but fast teleportation to the head
-            local tweenInfo = TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-            local targetCFrame = head.CFrame
-
-            local tween = TweenService:Create(kunai, tweenInfo, {CFrame = targetCFrame})
-            tween:Play()
-
-            -- Mark the kunai as teleported to avoid teleporting it again
-            teleportedKunais[kunai] = true
+            -- Instantly set the kunai's position to the player's head (no tweening)
+            kunai.CFrame = head.CFrame
+            teleportedKunais[kunai] = true  -- Mark the kunai as teleported to avoid teleporting it again
         end
     end
 end
 
--- Function to check and teleport kunais to the selected player
-local function checkForKunais()
-    if selectedPlayerName then
-        for _, kunai in ipairs(workspace:GetChildren()) do
-            if (kunai.Name == "ThrownKunai" or kunai.Name == "ShurikenKunai") and not teleportedKunais[kunai] then
-                teleportKunaiToPlayerHead(kunai, selectedPlayerName)
-            end
+local function teleportKunaisToPlayers(kunais)
+    local players = game.Players:GetPlayers()
+    local localPlayer = game.Players.LocalPlayer
+
+    for i, kunai in ipairs(kunais) do
+        local playerIndex = (i - 1) % #players + 1
+        local player = players[playerIndex]
+
+        if player ~= localPlayer then
+            teleportKunaiToPlayerHead(kunai, player)
         end
     end
 end
 
--- Start a loop to continuously check for thrown kunais
-spawn(function()
-    while true do
-        checkForKunais()
-        wait(0.1)  -- Check more frequently (adjustable as needed)
+local function checkForThrownKunais()
+    local thrownKunais = {}
+    for _, kunai in ipairs(workspace:GetChildren()) do
+        if kunai.Name == "ThrownKunai" and not teleportedKunais[kunai] then
+            table.insert(thrownKunais, kunai)
+        end
     end
-end)
+
+    if #thrownKunais > 0 then
+        teleportKunaisToPlayers(thrownKunais)
+    end
+end
+
+local function startLoop()
+    while enabled do
+        checkForThrownKunais()
+        wait(0.1) -- Adjust this delay if needed for more frequent checks
+    end
+end
+
+local function toggle()
+    enabled = not enabled
+
+    if enabled then
+        TextButton_20.Text = "On"
+        TextButton_20.TextColor3 = Color3.fromRGB(0, 255, 0)
+        runConnection = coroutine.create(startLoop)
+        coroutine.resume(runConnection)
+    else
+        TextButton_20.Text = "Off"
+        TextButton_20.TextColor3 = Color3.fromRGB(255, 0, 0)
+        
+        if runConnection then
+            coroutine.yield(runConnection)
+            runConnection = nil
+        end
+    end
+end
+
 
 
 
@@ -7276,10 +7273,8 @@ local selectedPlayerName = nil
 
 
 
-local TweenService = game:GetService("TweenService")
 local teleportedKunais = {}
 
--- Function to teleport a kunai to the player's head using tweening
 local function teleportKunaiToPlayerHead(kunai, playerName)
     local player = game.Players:FindFirstChild(playerName)
 
@@ -7288,20 +7283,13 @@ local function teleportKunaiToPlayerHead(kunai, playerName)
         local head = character:FindFirstChild("Head")
 
         if head then
-            -- Use tweening for smooth but fast teleportation to the head
-            local tweenInfo = TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-            local targetCFrame = head.CFrame
-
-            local tween = TweenService:Create(kunai, tweenInfo, {CFrame = targetCFrame})
-            tween:Play()
-
-            -- Mark the kunai as teleported to avoid teleporting it again
-            teleportedKunais[kunai] = true
+            -- Instantly set the kunai's position to the player's head (no tweening)
+            kunai.CFrame = head.CFrame
+            teleportedKunais[kunai] = true  -- Mark the kunai as teleported to avoid teleporting it again
         end
     end
 end
 
--- Function to check and teleport kunais to the selected player
 local function checkForKunais()
     if selectedPlayerName then
         for _, kunai in ipairs(workspace:GetChildren()) do
@@ -7319,6 +7307,7 @@ spawn(function()
         wait(0.1)  -- Check more frequently (adjustable as needed)
     end
 end)
+
 
 
 
