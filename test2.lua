@@ -5354,7 +5354,7 @@ local function teleportKunaiToPlayerHead(kunai, playerName)
 
         if head then
             -- Introduce a 0.2-second delay to help with synchronization and prevent glitches
-            wait(0.2)  -- Slight delay to ensure proper synchronization
+            wait(0.1)  -- Slight delay to ensure proper synchronization
 
             -- Teleport the kunai to the player's head
             kunai.CFrame = head.CFrame
@@ -5377,7 +5377,7 @@ end
 spawn(function()
     while true do
         checkForKunais()
-        wait(0.2)  -- Short wait between checks to keep the loop fast
+        wait(0.1)  -- Short wait between checks to keep the loop fast
     end
 end)
 
@@ -6411,7 +6411,7 @@ local function teleportKunaiToPlayerHead(kunai, player)
         local head = character:FindFirstChild("Head")
         if head then
             -- Introduce a 0.2-second delay to help with synchronization and prevent glitches
-            wait(0.2)  -- Slight delay to ensure proper synchronization
+            wait(0.1)  -- Slight delay to ensure proper synchronization
 
             -- Teleport the kunai to the player's head
             kunai.CFrame = head.CFrame
@@ -7312,7 +7312,7 @@ local function teleportKunaiToPlayerHead(kunai, playerName)
 
         if head then
             -- Introduce a 0.2-second delay to help with synchronization and prevent glitches
-            wait(0.2)  -- Slight delay to ensure proper synchronization
+            wait(0.1)  -- Slight delay to ensure proper synchronization
 
             -- Teleport the kunai to the player's head
             kunai.CFrame = head.CFrame
